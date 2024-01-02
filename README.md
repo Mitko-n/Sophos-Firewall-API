@@ -30,6 +30,7 @@ aes-128-cbc-tool -k Th1s1Ss1mPlygR8API -t 1 -s <PASSWORD>
 entity_type = "FirewallRule"
 entity_type = "IPHost"
 ```
+For additional information check **entity_type.txt** file.
 ### Respone Format
 API response is Python Diction with following format:
 ```python
@@ -67,7 +68,7 @@ You can use only
 ```
 
 ### CREATE Entity
-Create entity with type **entity_type** from provided **entity_data**
+Create entity with type **entity_type** from provided **entity_data**.
 ```python
 response = firewall.create(entity_type, entity_data)
 ```
@@ -79,7 +80,7 @@ response = firewall.read(entity_type, entity_name)
 response = firewall.read(entity_type, entity_name, filter_type)
 ```
 ### UPDATE Entity
-Update entity with type **entity_type** with provided **entity_data**
+Update entity with type **entity_type** with provided **entity_data**.
 ```python
 response = firewall.update(entity_type, entity_data)
 ```
