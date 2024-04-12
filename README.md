@@ -1,5 +1,5 @@
 # Simple Sophos Firewall API 
-#### version v 0.1.0
+#### version v 0.5.0
 #
 ## General Informatin
 The Sophos Firewall API is a tool that simplifies the management of Sophos Firewall systems. It follows the CRUD specification, which means that it allows you to create, read, update, and delete firewall entities. While the API is designed to make your daily firewall management tasks easier, it's important to note that there is no guarantee that everything will run seamlessly. You are free to use our code, but please remember that any responsibility for usage falls solely on the user.
@@ -8,7 +8,8 @@ The Sophos Firewall API is a tool that simplifies the management of Sophos Firew
 Sophos Firewall API is still under development.
 
 ***Currente library***  
-```sophos_firewall_api.py```    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;utilises **request** library.  
+**sophos_firewall_api.py**&nbsp; &nbsp;Utilises ***request*** library.  
+**firewall_api.py**&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;It utilizes the ***Jinja2*** library and can be used with the context manager and its own request templates. It supports better error and request/response handling.
  
 #
 ## How to Use
@@ -31,8 +32,6 @@ entity_type = "FirewallRule"
 entity_type = "IPHost"
 ```
 
-
-
 For additional information check **entity_type.txt** file.
 ### Respone Format
 API response is Python Diction with following format:
@@ -53,19 +52,32 @@ First data element: **```response["data"][0]```**\
 Result code: **```response["code"]```**\
 Result description text: **```response["text"]```**
 
-### Initialization
+### Imports
 ```python
 from sophos_firewall_api import Firewall, EQ, NOT, LIKE
+```
+or
+```python
+from firewall_api import Firewall, EQ, NOT, LIKE
+```
+### Initialization with context manager
+```python
+from firewall_api import Firewall, EQ, NOT, LIKE
+
+with Firewall(username, password, firewall_ip, port=4444, certificate_verify=False, password_encrypted=False) as firewall:
+    response = firewall.read(entity_type)
+    # add your code here
+```
+### Initialization without context manager
+```python
+from sophos_firewall_api import Firewall, EQ, NOT, LIKE
+
 firewall = Firewall(username, password, firewall_ip)
 firewall = Firewall(username, password, firewall_ip, password_encrypted=True)
 firewall = Firewall(username, password, firewall_ip, port, certificate_verify=True, password_encrypted=True)
 ```
 
-Default Initialization
-```python
- firewall = Firewall(username, password, firewall_ip, port=4444, certificate_verify=False, password_encrypted=False)
-```
-You can use only
+### You can use only
 ```python
  firewall = Firewall(username, password, firewall_ip)
 ```
@@ -102,8 +114,9 @@ EQ      # matches entities with an exact name match
 NOT     # matches entities where the name does not match at all
 LIKE    # matches entities with partial name matches
 ```
+Filter Type is used for ***Read*** and ***Delete*** operations and applies to **entity_name**.\
 Default Filter Type for ***Read Entity*** is **LIKE** and\
-Default Filter Type for ***Delete Entity*** is ***EQ***
+Default Filter Type for ***Delete Entity*** is ***EQ***.
 
 ## Examples
 ### Read/Download Entiy/Template
