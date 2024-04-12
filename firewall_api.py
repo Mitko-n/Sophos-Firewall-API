@@ -8,8 +8,16 @@ LIKE = "like"
 
 
 class Firewall:
-    
-    def __init__(self, username, password, hostname, port=4444, certificate_verify=False, password_encrypted=False):
+    # init
+    def __init__(self, username:str, password:str, hostname:str, port:int=4444, certificate_verify:bool=False, password_encrypted:bool=False):
+        """
+        :param username: str: username
+        :param password: str: password
+        :param hostname: str: firewall hostname or ip
+        :param port: int: firewall port, default 4444
+        :param certificate_verify: bool: verify ssl certificate, default False
+        :param password_encrypted: bool: password is encrypted, default False
+        """
         self.username = username
         self.password = password
         self.hostname = hostname
@@ -25,27 +33,31 @@ class Firewall:
             self.session.verify = False
             requests.packages.urllib3.disable_warnings()
 
-
+    # open session
     def __enter__(self):
         return self
 
-
+    # close session
     def __exit__(self, exc_type, exc_value, traceback):
         if self.session:
             self.session.close()
   
-
+    # send xml request
     def _send_xml_request(self, xmldata):
             return self.session.post(self.url, headers=self.headers, data={"reqxml": xmldata}, timeout=30)
  
-
-    def _format_xml_response(self, response, entity_type):
+    # format xml response
+    def _format_xml_response(self, response:dict, entity_type:str):
+        """
+        :param response: dict: xml response
+        :param entity_type: str: entity type
+        :return: dict: formatted response
+        """
         if "Status" in response["Response"]:
             status = response["Response"]["Status"]
             if isinstance(status, str):
                 status = {"@code": "", "#text": status}
             return {"data": [], "code": status["@code"], "text": status["#text"]}
-
 
         login = response["Response"]["Login"]
         if login["status"] == "Authentication Failure":
@@ -74,7 +86,7 @@ class Firewall:
 
         return {"data": response_data, "code": "216", "text": "Operation Successful."}
 
-
+    # perform action
     def _perform_action(self, action_template_key, entity_type, entity_data=None, filter_selector=None):
        
         template_str = self.templates_dict.get(action_template_key)
@@ -89,22 +101,25 @@ class Firewall:
         else:
             return {"data": [], "code": response.status_code, "text": response.reason}
  
-    
+    # jinja2 templates for request
     templates_dict = {
         "create": """<Set operation="add"><{{ entity_type }}>
                                                 {{ entity_data | safe }}
                                             </{{ entity_type }}>
                     </Set>""",
+
         "read": """<Get><{{ entity_type }}>
                             {% if entity_data %}
                                 <Filter><key name="Name" criteria="{{ filter_selector }}">{{ entity_data }}</key></Filter>
                             {% endif %}
                         </{{ entity_type }}>
                     </Get>""",
+
         "update": """<Set operation="update"><{{ entity_type }}>
                                                 {{ entity_data | safe }}
                                             </{{ entity_type }}>
                     </Set>""",
+
         "delete": """<Remove><{{ entity_type }}>
                                 {% if entity_type == "FirewallRule" %}
                                     <Name>{{ entity_data }}</Name>
@@ -118,17 +133,39 @@ class Firewall:
     
     }
 
-    def create(self, entity_type, entity_data):
+    def create(self, entity_type:str, entity_data:dict) -> dict:
+        """
+        :param entity_type: str: entity type
+        :param entity_data: dict: entity data
+        :return: dict: response
+        """
         return self._perform_action("create", entity_type, entity_data=xmltodict.unparse(entity_data, full_document=False))
 
 
-    def read(self, entity_type, entity_data=None, filter_selector=LIKE):
+    def read(self, entity_type:str, entity_data:str=None, filter_selector:str=LIKE) -> dict:
+        """
+        :param entity_type: str: entity type
+        :param entity_data: str: entity data
+        :param filter_selector: str: filter selector
+        :return: dict: response
+        """
         return self._perform_action("read", entity_type, entity_data=entity_data, filter_selector=filter_selector)
 
 
-    def update(self, entity_type, entity_data):
+    def update(self, entity_type:str, entity_data:dict) -> dict:
+        """
+        :param entity_type: str: entity type
+        :param entity_data: dict: entity data
+        :return: dict: response
+        """
         return self._perform_action("update", entity_type, entity_data=xmltodict.unparse(entity_data, full_document=False))
 
 
-    def delete(self, entity_type, entity_data=None, filter_selector=EQ):
+    def delete(self, entity_type:str, entity_data:str=None, filter_selector:str=EQ) -> dict:
+        """
+        :param entity_type: str: entity type
+        :param entity_data: str: entity data
+        :param filter_selector: str: filter selector
+        :return: dict: response
+        """
         return self._perform_action("delete", entity_type, entity_data=entity_data, filter_selector=filter_selector)
