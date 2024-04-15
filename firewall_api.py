@@ -101,11 +101,12 @@ class Firewall:
         else:
             return {"data": [], "code": response.status_code, "text": response.reason}
  
-    # jinja2 templates for request
+    # jinja2 templates for CRUD requests
     templates_dict = {
-        "create": """<Set operation="add"><{{ entity_type }}>
-                                                {{ entity_data | safe }}
-                                            </{{ entity_type }}>
+        "create": """<Set operation="add">
+                        <{{ entity_type }}>
+                            {{ entity_data | safe }}
+                        </{{ entity_type }}>
                     </Set>""",
 
         "read": """<Get><{{ entity_type }}>
@@ -115,9 +116,10 @@ class Firewall:
                         </{{ entity_type }}>
                     </Get>""",
 
-        "update": """<Set operation="update"><{{ entity_type }}>
-                                                {{ entity_data | safe }}
-                                            </{{ entity_type }}>
+        "update": """<Set operation="update">
+                        <{{ entity_type }}>
+                            {{ entity_data | safe }}
+                        </{{ entity_type }}>
                     </Set>""",
 
         "delete": """<Remove><{{ entity_type }}>
@@ -129,7 +131,7 @@ class Firewall:
                                     {% endif %}
                                 {% endif %}
                             </{{ entity_type }}>
-                    </Remove>"""
+                    </Remove>""",
     
     }
 
