@@ -131,8 +131,7 @@ class Firewall:
                                     {% endif %}
                                 {% endif %}
                             </{{ entity_type }}>
-                    </Remove>""",
-    
+                    </Remove>""",    
     }
 
     def create(self, entity_type:str, entity_data:dict) -> dict:
