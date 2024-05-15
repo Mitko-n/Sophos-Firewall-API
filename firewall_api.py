@@ -55,8 +55,8 @@ class Firewall:
         """
         if "Status" in response["Response"]:
             status = response["Response"]["Status"]
-            if isinstance(status, str):
-                status = {"@code": "", "#text": status}
+            # if isinstance(status, str):
+            #     status = {"@code": "", "#text": status}
             return {"data": [], "code": status["@code"], "text": status["#text"]}
 
         login = response["Response"]["Login"]
