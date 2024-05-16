@@ -9,7 +9,15 @@ LIKE = "like"
 
 class Firewall:
     # init
-    def __init__(self, username:str, password:str, hostname:str, port:int=4444, certificate_verify:bool=False, password_encrypted:bool=False):
+    def __init__(
+        self,
+        username: str,
+        password: str,
+        hostname: str,
+        port: int = 4444,
+        certificate_verify: bool = False,
+        password_encrypted: bool = False,
+    ):
         """
         :param username: str: username
         :param password: str: password
@@ -26,8 +34,13 @@ class Firewall:
         self.password_encrypted = password_encrypted
         self.url = f"https://{hostname}:{port}/webconsole/APIController"
         self.headers = {"Accept": "application/xml"}
-        self.xml_login = f"<Login><Username>{username}</Username><Password{" passwordform='encrypt'" if password_encrypted else ""}>{password}</Password></Login>"
-       
+        self.xml_login = f"""
+            <Login> 
+                <Username>{username}</Username>
+                    <Password{" passwordform='encrypt'" if password_encrypted else ""}>{password}</Password>
+            </Login>
+        """
+
         self.session = requests.Session()
         if not self.certificate_verify:
             self.session.verify = False
@@ -41,13 +54,13 @@ class Firewall:
     def __exit__(self, exc_type, exc_value, traceback):
         if self.session:
             self.session.close()
-  
+
     # send xml request
     def _send_xml_request(self, xmldata):
-            return self.session.post(self.url, headers=self.headers, data={"reqxml": xmldata}, timeout=30)
- 
+        return self.session.post(self.url, headers=self.headers, data={"reqxml": xmldata}, timeout=30)
+
     # format xml response
-    def _format_xml_response(self, response:dict, entity_type:str):
+    def _format_xml_response(self, response: dict, entity_type: str):
         """
         :param response: dict: xml response
         :param entity_type: str: entity type
@@ -88,7 +101,6 @@ class Firewall:
 
     # perform action
     def _perform_action(self, action_template_key, entity_type, entity_data=None, filter_selector=None):
-       
         template_str = self.templates_dict.get(action_template_key)
         if not template_str:
             raise ValueError(f"No template found for action: {action_template_key}")
@@ -100,7 +112,7 @@ class Firewall:
             return self._format_xml_response(xmltodict.parse(response.content.decode()), entity_type)
         else:
             return {"data": [], "code": response.status_code, "text": response.reason}
- 
+
     # jinja2 templates for CRUD requests
     templates_dict = {
         "create": """<Set operation="add">
@@ -108,20 +120,17 @@ class Firewall:
                             {{ entity_data | safe }}
                         </{{ entity_type }}>
                     </Set>""",
-
         "read": """<Get><{{ entity_type }}>
                             {% if entity_data %}
                                 <Filter><key name="Name" criteria="{{ filter_selector }}">{{ entity_data }}</key></Filter>
                             {% endif %}
                         </{{ entity_type }}>
                     </Get>""",
-
         "update": """<Set operation="update">
                         <{{ entity_type }}>
                             {{ entity_data | safe }}
                         </{{ entity_type }}>
                     </Set>""",
-
         "delete": """<Remove><{{ entity_type }}>
                                 {% if entity_type == "FirewallRule" %}
                                     <Name>{{ entity_data }}</Name>
@@ -131,10 +140,10 @@ class Firewall:
                                     {% endif %}
                                 {% endif %}
                             </{{ entity_type }}>
-                    </Remove>""",    
+                    </Remove>""",
     }
 
-    def create(self, entity_type:str, entity_data:dict) -> dict:
+    def create(self, entity_type: str, entity_data: dict) -> dict:
         """
         :param entity_type: str: entity type
         :param entity_data: dict: entity data
@@ -142,8 +151,7 @@ class Firewall:
         """
         return self._perform_action("create", entity_type, entity_data=xmltodict.unparse(entity_data, full_document=False))
 
-
-    def read(self, entity_type:str, entity_data:str=None, filter_selector:str=LIKE) -> dict:
+    def read(self, entity_type: str, entity_data: str = None, filter_selector: str = LIKE) -> dict:
         """
         :param entity_type: str: entity type
         :param entity_data: str: entity data
@@ -152,8 +160,7 @@ class Firewall:
         """
         return self._perform_action("read", entity_type, entity_data=entity_data, filter_selector=filter_selector)
 
-
-    def update(self, entity_type:str, entity_data:dict) -> dict:
+    def update(self, entity_type: str, entity_data: dict) -> dict:
         """
         :param entity_type: str: entity type
         :param entity_data: dict: entity data
@@ -161,8 +168,7 @@ class Firewall:
         """
         return self._perform_action("update", entity_type, entity_data=xmltodict.unparse(entity_data, full_document=False))
 
-
-    def delete(self, entity_type:str, entity_data:str=None, filter_selector:str=EQ) -> dict:
+    def delete(self, entity_type: str, entity_data: str = None, filter_selector: str = EQ) -> dict:
         """
         :param entity_type: str: entity type
         :param entity_data: str: entity data
