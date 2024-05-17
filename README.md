@@ -87,7 +87,7 @@ Create entity with type **entity_type** from provided **entity_data**.
 ```python
 response = firewall.create(entity_type, entity_data)
 ```
-Some **entity_types** have additional **data_entity** that is required for the creation of the entity.
+Some **entity_types** have additional **entity_data** that is required for the creation of the entity.
 ### READ Entity
 Read entity with type **entity_type** and name **entity_name**. You can use **filter_type** for partial read.
 ```python
