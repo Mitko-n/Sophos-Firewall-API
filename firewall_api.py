@@ -17,7 +17,6 @@ class Firewall:
                 <{{ entity_type }}>{{ entity_data | safe }}</{{ entity_type }}>
             </Set>
         """,
-
         "read": """
             <Get>
                 <{{ entity_type }}>
@@ -29,13 +28,11 @@ class Firewall:
                 </{{ entity_type }}>
             </Get>
         """,
-
         "update": """
             <Set operation="update">
                 <{{ entity_type }}>{{ entity_data | safe }}</{{ entity_type }}>
             </Set>
         """,
-
         "delete": """
             <Remove>
                 <{{ entity_type }}>
@@ -51,9 +48,7 @@ class Firewall:
                 </{{ entity_type }}>
             </Remove>
         """,
-
         "url": """https://{{ hostname }}:{{ port }}/webconsole/APIController""",
-        
         "login": """
             <Login>
                 <Username>{{ username }}</Username>
@@ -88,23 +83,24 @@ class Firewall:
     def _format_xml_response(self, response, entity_type):
         # Format XML response data for readability and ease of use
         # Check for general status in the main response
-        if "Status" in response["Response"]:
-            status = response["Response"]["Status"]
-            return {"data": [], "code": status["@code"], "text": status["#text"]}
+
+        response = response["Response"]
+
+        if "Status" in response:
+            return {"data": [], "code": response["Status"]["@code"], "text": response["Status"]["#text"]}
 
         # Check for authentication failure in the login response
-        login = response["Response"]["Login"]
-        if login and login["status"] == "Authentication Failure":
-            return {"data": [], "code": "401", "text": login["status"]}
+        if response["Login"] and response["Login"]["status"] == "Authentication Failure":
+            return {"data": [], "code": "401", "text": response["Login"]["status"]}
 
         # Check for entity-specific status and data
-        if entity_type in response["Response"]:
-            entity_data = response["Response"][entity_type]
+        if entity_type in response:
+            entity_data = response[entity_type]
             if "Status" in entity_data:
                 if "@code" in entity_data["Status"]:
                     return {"data": [], "code": entity_data["Status"]["@code"], "text": entity_data["Status"]["#text"]}
-                elif entity_data["Status"] == "No. of records Zero.":
-                    return {"data": [], "code": "526", "text": "Record does not exist."}
+                elif entity_data["Status"] in ["No. of records Zero.", "Number of records Zero."]:
+                    return {"data": [], "code": "526", "text": f"Record does not exist."}
 
             # Prepare and clean the entity response data
             entity_data = [entity_data] if isinstance(entity_data, dict) else entity_data
