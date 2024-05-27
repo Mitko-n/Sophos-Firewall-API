@@ -108,7 +108,7 @@ class Firewall:
             return {"data": entity_data, "code": "216", "text": "Operation Successful."}
 
         # Default case if entity_type is not found
-        return {"data": [], "code": "404", "text": "Entity not found"}
+        return {"data": [], "code": "404", "text": "Entity not found"}  # NOT CLEAR IF WE NEED THIS
 
     def _perform_action(self, action_template_key, entity_type, entity_data=None, filter_selector=None):
         # Perform an action (CRUD) using the provided template and data
