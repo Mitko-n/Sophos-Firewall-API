@@ -48,19 +48,18 @@ class Firewall:
                 </{{ entity_type }}>
             </Remove>
         """,
-        "url": """https://{{ hostname }}:{{ port }}/webconsole/APIController""",
-        "login": """
-            <Login>
-                <Username>{{ username }}</Username>
-                <Password{% if password_encrypted %} passwordform='encrypt'{% endif %}>{{ password }}</Password>
-            </Login>
-        """,
     }
 
     def __init__(self, username, password, hostname, port=4444, certificate_verify=False, password_encrypted=False):
         # Rendering URL and login XML templates with provided data
-        self.url = Template(self.templates_dict["url"]).render(hostname=hostname, port=port)
-        self.xml_login = Template(self.templates_dict["login"]).render(username=username, password=password, password_encrypted=password_encrypted)
+        self.url = f"https://{hostname}:{port}/webconsole/APIController"
+        self.xml_login = f"""
+            <Login> 
+                <Username>{username}</Username>
+                    <Password{" passwordform='encrypt'" if password_encrypted else ""}>{password}</Password>
+            </Login>
+        """
+
         # Setting up requests session
         self.session = requests.Session()
         self.session.verify = certificate_verify
